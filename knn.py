@@ -57,7 +57,8 @@ def auto_norm(dataset):
 	norm_dataset = dataset - np.tile(min,(row,1))
 	norm_dataset = norm_dataset / np.tile(sub,(row,1))
 	return norm_dataset,sub,min
-	
+
+#约会网站样本	
 def test_datingTestSet():
 	data_set,date_labels = file2matrix('dataset\\datingTestSet2.txt')
 	norm_dataset,sub,min = auto_norm(data_set)
@@ -70,12 +71,46 @@ def test_datingTestSet():
 		if result == date_labels[i]:
 			ok += 1
 		else:
-			print("测试结果为{}，正确结果为{}".format(result, date_labels[i]))
-			print("测试数据{}失败".format(i+1))
+			print("测试错误结果为{}，正确结果为{}".format(result, date_labels[i]))
+	print("测试总记录数为{}，成功记录数为{}，KNN算法成功率为{}".format(rows,ok,ok/rows))
+	
+	
+#手写识别系统
+import os
+def imgae2matrix(filepath):
+	filelist = os.listdir(filepath)
+	m = len(filelist)
+	array_m_1024 = np.zeros((m,1024))
+	k = 0
+	labels = []
+	for file in filelist:
+		#对文件名进行处理得到labels
+		label = file.split('_')[0]
+		labels.append(label)
+		array_1_1024 = np.zeros((1,1024))
+		with open(os.path.join(filepath,file),'r') as pf:
+			for i in range(32):
+				line = pf.readline()
+				for j in range(32):
+					array_1_1024[0,32*i+j] = int(line[j])
+		array_m_1024[k,:] = array_1_1024
+		k+=1
+	return array_m_1024,labels
+			
+def test_numbers():
+	array_m_1024,labels = imgae2matrix('dataset\\trainingDigits\\')
+	test_array_m_1024,test_labels = imgae2matrix('dataset\\testDigits\\')
+	ok = 0
+	rows = test_array_m_1024.shape[0]
+	for i in range(rows):
+		in_data = test_array_m_1024[i,:]
+		result = knn(labels, array_m_1024, in_data,5)
+		if result == test_labels[i]:
+			ok += 1
+		else:
+			print("测试错误结果为{},正确结果为{}".format(result, test_labels[i]))
 	print("测试总记录数为{}，成功记录数为{}，KNN算法成功率为{}".format(rows,ok,ok/rows))
 	
 if __name__ == "__main__":
 	test_datingTestSet()
-		
-	
-	
+	test_numbers()
